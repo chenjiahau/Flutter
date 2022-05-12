@@ -16,15 +16,15 @@ class MyApp extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              const CircleAvatar(
+            children: const <Widget>[
+              CircleAvatar(
                 radius: 50,
                 backgroundImage: AssetImage("images/login.png"),
               ),
-              const SizedBox(
+              SizedBox(
                 height: 12.0,
               ),
-              const Text(
+              Text(
                 "Sing In",
                 style: TextStyle(
                   fontFamily: "Tapestry",
@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
                   letterSpacing: 3.0,
                 ),
               ),
-              const Text(
+              Text(
                 "Developer",
                 style: TextStyle(
                   fontFamily: "DidactGothic",
@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
                   letterSpacing: 0.5,
                 ),
               ),
-              const SizedBox(
+              SizedBox(
                 height: 20.0,
                 width: 200.0,
                 child: Divider(
@@ -52,24 +52,25 @@ class MyApp extends StatelessWidget {
                   color: Colors.white,
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    vertical: 20.0, horizontal: 60.0),
-                child: Row(
-                  children: const <Widget>[
-                    Icon(
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 40.0),
+                child: Card(
+                  child: ListTile(
+                    tileColor: Colors.lightBlue,
+                    leading: Icon(
                       Icons.account_circle,
                       color: Colors.white,
                       size: 22.0,
                     ),
-                    SizedBox(width: 10.0),
-                    Text("Tell me who are you?",
-                        style: TextStyle(
-                          fontFamily: "DidactGothic",
-                          color: Colors.white,
-                          fontSize: 22.0,
-                        ))
-                  ],
+                    title: Text(
+                      "Tell me who are you?",
+                      style: TextStyle(
+                        fontFamily: "DidactGothic",
+                        color: Colors.white,
+                        fontSize: 22.0,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],
