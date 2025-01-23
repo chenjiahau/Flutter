@@ -1,7 +1,9 @@
+import 'package:app/models/question.dart';
 import 'package:flutter/material.dart';
 
 import 'package:app/screens/landing_screen.dart';
 import 'package:app/screens/play_screen.dart';
+import 'package:app/screens/result_screen.dart';
 
 void main() {
   runApp(const PuzzleApp());
@@ -19,13 +21,19 @@ class _PuzzleAppState extends State<PuzzleApp> {
 
   void gotoPlayScreen() {
     setState(() {
-      currentScreen = PlayScreen(gotoLandingScreen);
+      currentScreen = PlayScreen(gotoLandingScreen, gotoResultScreen);
     });
   }
 
   void gotoLandingScreen() {
     setState(() {
       currentScreen = LandingScreen(gotoPlayScreen);
+    });
+  }
+
+  void gotoResultScreen(List<Question> questions, List<String> answers) {
+    setState(() {
+      currentScreen = ResultScreen(gotoLandingScreen, questions, answers);
     });
   }
 
