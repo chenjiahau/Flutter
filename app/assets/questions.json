@@ -42,5 +42,71 @@
       "Madrid"
     ],
     "answer": "London"
+  },
+  {
+    "id": 5,
+    "question": "What is the capital of Italy?",
+    "options": [
+      "Paris",
+      "London",
+      "Berlin",
+      "Rome"
+    ],
+    "answer": "Rome"
+  },
+  {
+    "id": 6,
+    "question": "What is the capital of Portugal?",
+    "options": [
+      "Paris",
+      "Lisbon",
+      "Berlin",
+      "Madrid"
+    ],
+    "answer": "Lisbon"
+  },
+  {
+    "id": 7,
+    "question": "What is the capital of Belgium?",
+    "options": [
+      "Paris",
+      "London",
+      "Brussels",
+      "Madrid"
+    ],
+    "answer": "Brussels"
+  },
+  {
+    "id": 8,
+    "question": "What is the capital of Netherlands?",
+    "options": [
+      "Paris",
+      "London",
+      "Berlin",
+      "Amsterdam"
+    ],
+    "answer": "Amsterdam"
+  },
+  {
+    "id": 9,
+    "question": "What is the capital of Switzerland?",
+    "options": [
+      "Paris",
+      "London",
+      "Bern",
+      "Madrid"
+    ],
+    "answer": "Bern"
+  },
+  {
+    "id": 10,
+    "question": "What is the capital of Sweden?",
+    "options": [
+      "Paris",
+      "Stockholm",
+      "Berlin",
+      "Madrid"
+    ],
+    "answer": "Stockholm"
   }
 ]
