@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 
 import 'package:accounting/utils/theme_util.dart';
 import 'package:accounting/providers/theme_provider.dart';
+import 'package:accounting/providers/user_provider.dart';
+
+import 'package:accounting/root_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,6 +26,9 @@ class _MyApp extends State<MyApp> {
         ChangeNotifierProvider<ThemeProvider>(
           create: (_) => ThemeProvider(),
         ),
+        ChangeNotifierProvider<UserProvider>(
+          create: (_) => UserProvider(),
+        ),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
@@ -32,55 +38,9 @@ class _MyApp extends State<MyApp> {
           );
 
           return MaterialApp(
-            title: 'Accounting',
             theme: themeData,
             home: Scaffold(
-              appBar: AppBar(
-                title: const Text('Accounting'),
-                actions: [
-                  IconButton(
-                    icon: Icon(themeProvider.isDarkTheme
-                        ? Icons.light_mode
-                        : Icons.dark_mode),
-                    onPressed: () {
-                      themeProvider.setDarkTheme(!themeProvider.isDarkTheme);
-                    },
-                  ),
-                ],
-              ),
-              body: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Center(
-                    child: Text(
-                      'Accounting App',
-                      style: themeData.textTheme.titleLarge?.copyWith(),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 18,
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Perform some action
-                      print('Button Pressed');
-                    },
-                    child: const Text('Button'),
-                  ),
-                  SizedBox(
-                    height: 18,
-                  ),
-                  TextButton(
-                      onPressed: () {
-
-                      },
-                      child: const Text(
-                        'Text Button'
-                      ),
-                  ),
-                ],
-              )
+              body: const RootScreen(),
             )
           );
         },
