@@ -38,6 +38,7 @@ dependencies:
   provider: ^6.1.4
   shared_preferences: ^2.5.3
   flutter_iconly: ^1.0.2
+  flutter_easyloading: ^3.0.5
   
 
 dev_dependencies:
