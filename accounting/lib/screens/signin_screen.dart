@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
@@ -7,6 +8,7 @@ import 'package:accounting/providers/theme_provider.dart';
 import 'package:accounting/providers/user_provider.dart';
 
 import 'package:accounting/utils/validation_util.dart';
+import 'package:accounting/utils/dialog_util.dart';
 
 import 'package:accounting/const/app-info.dart';
 import 'package:accounting/const/style.dart';
@@ -24,10 +26,16 @@ import 'package:accounting/widgets/error_message_widget.dart';
 import 'package:accounting/screens/home_screen.dart';
 import 'package:accounting/screens/signup_screen.dart';
 
+import 'package:accounting/models/user_model.dart';
+import 'package:accounting/models/token_model.dart';
+
+import 'package:accounting/services/unauth_service.dart';
+
 class SignInScreen extends StatefulWidget {
   static const String id = '/signin';
 
   final ThemeData themeData;
+
   const SignInScreen({super.key, required this.themeData});
 
   @override
@@ -123,6 +131,62 @@ class _SignInScreenState extends State<SignInScreen> {
     }
   }
 
+  bool isFormValid() {
+    return email["isVerified"] && password["isVerified"];
+  }
+
+  Future submit() async {
+    final user = User(
+      email: email["controller"].text,
+      password: password["controller"].text,
+    );
+
+    if (isFormValid()) {
+      EasyLoading.show(maskType: EasyLoadingMaskType.black);
+
+      final userProvider = context.read<UserProvider>();
+      var unauthService = UnauthService();
+
+      try {
+        var response = await unauthService.signIn(user.toJson());
+
+        if (response.statusCode == 200) {
+          EasyLoading.dismiss();
+          final responseBody = jsonDecode(response.body);
+          Token token = Token.fromJson(responseBody["data"]["token"]);
+          userProvider.setToken(token);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        } else {
+          EasyLoading.dismiss();
+          final responseBody = jsonDecode(response.body);
+          showErrorDialog(context: context, message: responseBody["message"]);
+        }
+      } catch (e) {
+        EasyLoading.dismiss();
+        showErrorDialog(context: context, message: ErrorString.general);
+        return;
+      }
+    } else {
+      EasyLoading.dismiss();
+      showErrorDialog(context: context, message: ErrorString.fieldsRequired);
+    }
+  }
+
+  cleanForm() {
+    FocusScope.of(context).unfocus();
+    setState(() {
+      email["controller"].clear();
+      password["controller"].clear();
+      email["isTouched"] = false;
+      password["isTouched"] = false;
+      email["isVerified"] = false;
+      password["isVerified"] = false;
+    });
+  }
+
   @override
   void dispose() {
     email["controller"].dispose();
@@ -138,7 +202,20 @@ class _SignInScreenState extends State<SignInScreen> {
     final Size screenSize = MediaQuery.of(context).size;
     final double width = screenSize.width;
     final themeProvider = context.watch<ThemeProvider>();
-    final userProvider = context.watch<UserProvider>();
+
+    final token = context.watch<UserProvider>().token;
+    if (token.token.isNotEmpty) {
+      EasyLoading.show(maskType: EasyLoadingMaskType.black);
+      Future.microtask(() {
+        Future.delayed(const Duration(seconds: 1), () {
+          EasyLoading.dismiss();
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        });
+      });
+    }
 
     return MaterialApp(
       theme: widget.themeData,
@@ -167,7 +244,7 @@ class _SignInScreenState extends State<SignInScreen> {
                               alignment: Alignment.center,
                               child: TitleWidget(
                                 isDarkTheme: themeProvider.isDarkTheme,
-                                title: 'Accounting App',
+                                title: AppInfo.appName,
                               ),
                             ),
                             DividerWidget(),
@@ -191,8 +268,13 @@ class _SignInScreenState extends State<SignInScreen> {
                                     onChanged:
                                         (value) => checkEmailValidation(),
                                   ),
-                                  ErrorMessage(
-                                    message: "Invalid email address",
+                                  Visibility(
+                                    visible:
+                                        email["isTouched"] &&
+                                        !email["isVerified"],
+                                    child: ErrorMessage(
+                                      message: ErrorString.invalidEmail,
+                                    ),
                                   ),
                                   DividerWidget(),
                                   InputWidget(
@@ -212,7 +294,14 @@ class _SignInScreenState extends State<SignInScreen> {
                                     onChanged:
                                         (value) => checkPasswordValidation(),
                                   ),
-                                  ErrorMessage(message: "Invalid password"),
+                                  Visibility(
+                                    visible:
+                                        password["isTouched"] &&
+                                        !password["isVerified"],
+                                    child: ErrorMessage(
+                                      message: ErrorString.invalidPassword,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -225,27 +314,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                     isDarkTheme: themeProvider.isDarkTheme,
                                     text: 'Login',
                                     icon: IconlyBold.login,
-                                    onPressed: () {
-                                      EasyLoading.show(maskType: EasyLoadingMaskType.black);
-                                      Future.delayed(
-                                        const Duration(seconds: 3),
-                                        () {
-                                          EasyLoading.showSuccess(
-                                            'Login Success',
-                                          );
-                                          EasyLoading.dismiss();
-                                          userProvider.setUser(true);
-                                          Navigator.pushReplacement(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder:
-                                                  (context) =>
-                                                      const HomeScreen(),
-                                            ),
-                                          );
-                                        },
-                                      );
-                                    },
+                                    onPressed: () => submit(),
                                   ),
                                 ),
                                 const SizedBox(width: 8.0),
@@ -255,9 +324,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                     isDanger: true,
                                     icon: IconlyBold.closeSquare,
                                     text: 'Cancel',
-                                    onPressed: () {
-                                      print("clicking");
-                                    },
+                                    onPressed: () => cleanForm(),
                                   ),
                                 ),
                               ],

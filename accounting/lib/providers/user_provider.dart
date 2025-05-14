@@ -1,24 +1,46 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:accounting/models/token_model.dart';
+
 class UserProvider with ChangeNotifier {
-  static const userStatus = 'USER_STATUS';
-  bool _isLoggedIn = false;
-  bool get isLoggedIn => _isLoggedIn;
+  static const userToken = 'USER_TOKEN';
+  Token _token = Token();
+  Token get token => _token;
+
+  UserProvider() {
+    loadToken();
+  }
 
   // Set the user status in shared preferences
-  setUser(bool value) async {
+  setToken(Token token) async {
+    _token = token;
     SharedPreferences sp = await SharedPreferences.getInstance();
-    sp.setBool(userStatus, value);
-    _isLoggedIn = value;
+    sp.setString(userToken, jsonEncode(token.toJson()));
     notifyListeners();
   }
 
   // Get the user status from shared preferences
-  Future<bool> getUser() async {
+  Future<void> loadToken() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
-    _isLoggedIn = sp.getBool(userStatus) ?? false;
+    String? token = sp.getString(userToken);
+
+    if (token != null) {
+      _token = Token.fromJson(jsonDecode(token));
+    } else {
+      _token = Token();
+    }
+
     notifyListeners();
-    return isLoggedIn;
+  }
+
+  // Clear the user status from shared preferences
+  Future<void> clearToken() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    sp.remove(userToken);
+    _token = Token();
+    notifyListeners();
   }
 }

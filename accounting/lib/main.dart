@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -11,7 +12,9 @@ import 'package:accounting/screens/home_screen.dart';
 import 'package:accounting/screens/signin_screen.dart';
 import 'package:accounting/screens/signup_screen.dart';
 
-void main() {
+Future<void> main() async {
+  await dotenv.load();
+
   runApp(
     MultiProvider(
       providers: [

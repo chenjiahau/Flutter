@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
@@ -6,8 +7,8 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:accounting/providers/theme_provider.dart';
 import 'package:accounting/providers/user_provider.dart';
 
-import 'package:accounting/utils/theme_util.dart';
 import 'package:accounting/utils/validation_util.dart';
+import 'package:accounting/utils/dialog_util.dart';
 
 import 'package:accounting/const/app-info.dart';
 import 'package:accounting/const/style.dart';
@@ -22,13 +23,16 @@ import 'package:accounting/widgets/paragraph_widget.dart';
 import 'package:accounting/widgets/divider_widget.dart';
 import 'package:accounting/widgets/error_message_widget.dart';
 
-import 'package:accounting/screens/home_screen.dart';
 import 'package:accounting/screens/signin_screen.dart';
+
+import 'package:accounting/models/user_model.dart';
+import 'package:accounting/services/unauth_service.dart';
 
 class SignUpScreen extends StatefulWidget {
   static const String id = '/signup';
 
   final ThemeData themeData;
+
   const SignUpScreen({super.key, required this.themeData});
 
   @override
@@ -143,9 +147,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
       setState(() {
         email["isVerified"] = checkEmail(email["controller"].text);
       });
-    } else {
+    }
+  }
+
+  void checkNameValidation() {
+    setState(() {
+      name["isTouched"] = true;
+    });
+
+    if (name["isTouched"]) {
       setState(() {
-        email["isVerified"] = false;
+        name["isVerified"] = checkString(name["controller"].text, 1, 32);
       });
     }
   }
@@ -163,10 +175,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
           password["maxLength"],
         );
       });
-    } else {
-      setState(() {
-        password["isVerified"] = false;
-      });
     }
   }
 
@@ -183,11 +191,81 @@ class _SignUpScreenState extends State<SignUpScreen> {
           confirmPassword["maxLength"],
         );
       });
-    } else {
-      setState(() {
-        confirmPassword["isVerified"] = false;
-      });
     }
+  }
+
+  bool isFormValid() {
+    return email["isVerified"] &&
+        name["isVerified"] &&
+        password["isVerified"] &&
+        confirmPassword["isVerified"] &&
+        (password["controller"].text == confirmPassword["controller"].text);
+  }
+
+  Future<void> submit() async {
+    FocusScope.of(context).unfocus();
+
+    final user = User(
+      email: email["controller"].text,
+      name: name["controller"].text,
+      password: password["controller"].text,
+    );
+
+    if (isFormValid()) {
+      EasyLoading.show(maskType: EasyLoadingMaskType.black);
+      final unauthService = UnauthService();
+
+      try {
+        var response = await unauthService.signUp(user.toJson());
+
+        if (response.statusCode == 200) {
+          EasyLoading.dismiss();
+          showSuccessDialog(
+            context: context,
+            message: SuccessString.registration,
+            btnText: "OK",
+            callbackFn: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) => SignInScreen(themeData: widget.themeData),
+                ),
+              );
+            },
+          );
+        } else {
+          EasyLoading.dismiss();
+          final responseBody = jsonDecode(response.body);
+          showErrorDialog(context: context, message: responseBody["message"]);
+        }
+      } catch (error) {
+        EasyLoading.dismiss();
+        showErrorDialog(context: context, message: ErrorString.general);
+      }
+    } else {
+      showErrorDialog(context: context, message: ErrorString.fieldsRequired);
+    }
+  }
+
+  cleanForm() {
+    FocusScope.of(context).unfocus();
+    setState(() {
+      email["controller"].clear();
+      name["controller"].clear();
+      password["controller"].clear();
+      confirmPassword["controller"].clear();
+
+      email["isTouched"] = false;
+      name["isTouched"] = false;
+      password["isTouched"] = false;
+      confirmPassword["isTouched"] = false;
+
+      email["isVerified"] = false;
+      name["isVerified"] = false;
+      password["isVerified"] = false;
+      confirmPassword["isVerified"] = false;
+    });
   }
 
   @override
@@ -238,7 +316,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               alignment: Alignment.center,
                               child: TitleWidget(
                                 isDarkTheme: themeProvider.isDarkTheme,
-                                title: 'Accounting App',
+                                title: AppInfo.appName,
                               ),
                             ),
                             DividerWidget(),
@@ -262,8 +340,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     onChanged:
                                         (value) => checkEmailValidation(),
                                   ),
-                                  ErrorMessage(
-                                    message: "Invalid email address",
+                                  Visibility(
+                                    visible:
+                                        email["isTouched"] &&
+                                        !email["isVerified"],
+                                    child: ErrorMessage(
+                                      message: ErrorString.invalidEmail,
+                                    ),
                                   ),
                                   DividerWidget(),
                                   InputWidget(
@@ -275,8 +358,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     isEnabled: name["isEnabled"],
                                     isTouched: name["isTouched"],
                                     isVerified: name["isVerified"],
+                                    onChanged: (value) => checkNameValidation(),
                                   ),
-                                  ErrorMessage(message: "Invalid name"),
+                                  Visibility(
+                                    visible:
+                                        name["isTouched"] &&
+                                        !name["isVerified"],
+                                    child: ErrorMessage(
+                                      message: ErrorString.invalidName,
+                                    ),
+                                  ),
                                   DividerWidget(),
                                   InputWidget(
                                     isDarkTheme: themeProvider.isDarkTheme,
@@ -290,12 +381,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     isRequired: password["isRequired"],
                                     isEnabled: password["isEnabled"],
                                     isTouched: password["isTouched"],
-                                    isVerified: password["isVerified"],
+                                    isVerified:
+                                        password["isVerified"] &&
+                                        password["controller"].text ==
+                                            confirmPassword["controller"].text,
                                     toggleEye: togglePasswordEye,
                                     onChanged:
                                         (value) => checkPasswordValidation(),
                                   ),
-                                  ErrorMessage(message: "Invalid password"),
+                                  Visibility(
+                                    visible:
+                                        password["isTouched"] &&
+                                            !password["isVerified"] ||
+                                        (password["controller"].text !=
+                                            confirmPassword["controller"].text),
+                                    child: ErrorMessage(
+                                      message: ErrorString.invalidPassword,
+                                    ),
+                                  ),
                                   DividerWidget(),
                                   InputWidget(
                                     isDarkTheme: themeProvider.isDarkTheme,
@@ -309,13 +412,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     isRequired: confirmPassword["isRequired"],
                                     isEnabled: confirmPassword["isEnabled"],
                                     isTouched: confirmPassword["isTouched"],
-                                    isVerified: confirmPassword["isVerified"],
+                                    isVerified:
+                                        confirmPassword["isVerified"] &&
+                                        password["controller"].text ==
+                                            confirmPassword["controller"].text,
                                     toggleEye: toggleConfirmPasswordEye,
                                     onChanged:
                                         (value) =>
                                             checkConfirmPasswordValidation(),
                                   ),
-                                  ErrorMessage(message: "Invalid password"),
+                                  Visibility(
+                                    visible:
+                                        confirmPassword["isTouched"] &&
+                                            !confirmPassword["isVerified"] ||
+                                        (password["controller"].text !=
+                                            confirmPassword["controller"].text),
+                                    child: ErrorMessage(
+                                      message: ErrorString.invalidConfirmPassword,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -328,24 +443,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     isDarkTheme: themeProvider.isDarkTheme,
                                     text: 'Register',
                                     icon: IconlyBold.login,
-                                    onPressed: () {
-                                      EasyLoading.show(maskType: EasyLoadingMaskType.black);
-                                      Future.delayed(
-                                        const Duration(seconds: 3),
-                                        () {
-                                          EasyLoading.dismiss();
-                                          userProvider.setUser(true);
-                                          Navigator.pushReplacement(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder:
-                                                  (context) =>
-                                                      const HomeScreen(),
-                                            ),
-                                          );
-                                        },
-                                      );
-                                    },
+                                    onPressed: () => submit(),
                                   ),
                                 ),
                                 const SizedBox(width: 8.0),
@@ -355,9 +453,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     isDanger: true,
                                     icon: IconlyBold.closeSquare,
                                     text: 'Cancel',
-                                    onPressed: () {
-                                      print("clicking");
-                                    },
+                                    onPressed: () => cleanForm(),
                                   ),
                                 ),
                               ],
