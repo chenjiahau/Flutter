@@ -225,13 +225,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             message: SuccessString.registration,
             btnText: "OK",
             callbackFn: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder:
-                      (context) => SignInScreen(themeData: widget.themeData),
-                ),
-              );
+              Navigator.pushReplacementNamed(context, SignInScreen.id);
             },
           );
         } else {
@@ -288,215 +282,204 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final double width = screenSize.width;
     final themeProvider = context.watch<ThemeProvider>();
     final userProvider = context.watch<UserProvider>();
-
-    return MaterialApp(
-      theme: widget.themeData,
-      home: Scaffold(
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: IntrinsicHeight(
-                  child: Container(
-                    color: widget.themeData.scaffoldBackgroundColor,
-                    child: Padding(
-                      padding: const EdgeInsets.all(Styles.padding),
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            CircleImageWidget(
-                              imagePath: AppInfo.logoPath,
-                              width: width * 0.3,
-                              height: width * 0.3,
-                            ),
-                            DividerWidget(),
-                            Align(
-                              alignment: Alignment.center,
-                              child: TitleWidget(
-                                isDarkTheme: themeProvider.isDarkTheme,
-                                title: AppInfo.appName,
-                              ),
-                            ),
-                            DividerWidget(),
-                            BaseContainerWidget(
+    print(widget.themeData.scaffoldBackgroundColor.toString());
+    return Scaffold(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: IntrinsicHeight(
+                child: Container(
+                  child: Padding(
+                    padding: const EdgeInsets.all(Styles.padding),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircleImageWidget(
+                            imagePath: AppInfo.logoPath,
+                            width: width * 0.3,
+                            height: width * 0.3,
+                          ),
+                          DividerWidget(),
+                          Align(
+                            alignment: Alignment.center,
+                            child: TitleWidget(
                               isDarkTheme: themeProvider.isDarkTheme,
-                              width: width,
-                              padding: 0.0,
-                              borderColor: widget.themeData.primaryColor,
-                              child: Column(
-                                children: [
-                                  InputWidget(
-                                    isDarkTheme: themeProvider.isDarkTheme,
-                                    controller: email["controller"],
-                                    focusNode: email["focusNode"],
-                                    hintText: email["hintText"],
-                                    isEmail: email["isEmail"],
-                                    isRequired: email["isRequired"],
-                                    isEnabled: email["isEnabled"],
-                                    isTouched: email["isTouched"],
-                                    isVerified: email["isVerified"],
-                                    onChanged:
-                                        (value) => checkEmailValidation(),
-                                  ),
-                                  Visibility(
-                                    visible:
-                                        email["isTouched"] &&
-                                        !email["isVerified"],
-                                    child: ErrorMessage(
-                                      message: ErrorString.invalidEmail,
-                                    ),
-                                  ),
-                                  DividerWidget(),
-                                  InputWidget(
-                                    isDarkTheme: themeProvider.isDarkTheme,
-                                    controller: name["controller"],
-                                    focusNode: name["focusNode"],
-                                    hintText: name["hintText"],
-                                    isRequired: name["isRequired"],
-                                    isEnabled: name["isEnabled"],
-                                    isTouched: name["isTouched"],
-                                    isVerified: name["isVerified"],
-                                    onChanged: (value) => checkNameValidation(),
-                                  ),
-                                  Visibility(
-                                    visible:
-                                        name["isTouched"] &&
-                                        !name["isVerified"],
-                                    child: ErrorMessage(
-                                      message: ErrorString.invalidName,
-                                    ),
-                                  ),
-                                  DividerWidget(),
-                                  InputWidget(
-                                    isDarkTheme: themeProvider.isDarkTheme,
-                                    controller: password["controller"],
-                                    focusNode: password["focusNode"],
-                                    hintText: password["hintText"],
-                                    minLength: password["minLength"],
-                                    maxLength: password["maxLength"],
-                                    isPassword: password["isPassword"],
-                                    isOpenEye: password["isOpenEye"],
-                                    isRequired: password["isRequired"],
-                                    isEnabled: password["isEnabled"],
-                                    isTouched: password["isTouched"],
-                                    isVerified:
-                                        password["isVerified"] &&
-                                        password["controller"].text ==
-                                            confirmPassword["controller"].text,
-                                    toggleEye: togglePasswordEye,
-                                    onChanged:
-                                        (value) => checkPasswordValidation(),
-                                  ),
-                                  Visibility(
-                                    visible:
-                                        password["isTouched"] &&
-                                            !password["isVerified"] ||
-                                        (password["controller"].text !=
-                                            confirmPassword["controller"].text),
-                                    child: ErrorMessage(
-                                      message: ErrorString.invalidPassword,
-                                    ),
-                                  ),
-                                  DividerWidget(),
-                                  InputWidget(
-                                    isDarkTheme: themeProvider.isDarkTheme,
-                                    controller: confirmPassword["controller"],
-                                    focusNode: confirmPassword["focusNode"],
-                                    hintText: confirmPassword["hintText"],
-                                    minLength: confirmPassword["minLength"],
-                                    maxLength: confirmPassword["maxLength"],
-                                    isPassword: confirmPassword["isPassword"],
-                                    isOpenEye: confirmPassword["isOpenEye"],
-                                    isRequired: confirmPassword["isRequired"],
-                                    isEnabled: confirmPassword["isEnabled"],
-                                    isTouched: confirmPassword["isTouched"],
-                                    isVerified:
-                                        confirmPassword["isVerified"] &&
-                                        password["controller"].text ==
-                                            confirmPassword["controller"].text,
-                                    toggleEye: toggleConfirmPasswordEye,
-                                    onChanged:
-                                        (value) =>
-                                            checkConfirmPasswordValidation(),
-                                  ),
-                                  Visibility(
-                                    visible:
-                                        confirmPassword["isTouched"] &&
-                                            !confirmPassword["isVerified"] ||
-                                        (password["controller"].text !=
-                                            confirmPassword["controller"].text),
-                                    child: ErrorMessage(
-                                      message: ErrorString.invalidConfirmPassword,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                              title: AppInfo.appName,
                             ),
-                            DividerWidget(height: Styles.dividerHeight),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          ),
+                          DividerWidget(),
+                          BaseContainerWidget(
+                            isDarkTheme: themeProvider.isDarkTheme,
+                            width: width,
+                            padding: 0.0,
+                            borderColor: widget.themeData.primaryColor,
+                            child: Column(
                               children: [
-                                Flexible(
-                                  child: Button(
-                                    isDarkTheme: themeProvider.isDarkTheme,
-                                    text: 'Register',
-                                    icon: IconlyBold.login,
-                                    onPressed: () => submit(),
+                                InputWidget(
+                                  isDarkTheme: themeProvider.isDarkTheme,
+                                  controller: email["controller"],
+                                  focusNode: email["focusNode"],
+                                  hintText: email["hintText"],
+                                  isEmail: email["isEmail"],
+                                  isRequired: email["isRequired"],
+                                  isEnabled: email["isEnabled"],
+                                  isTouched: email["isTouched"],
+                                  isVerified: email["isVerified"],
+                                  onChanged: (value) => checkEmailValidation(),
+                                ),
+                                Visibility(
+                                  visible:
+                                      email["isTouched"] &&
+                                      !email["isVerified"],
+                                  child: ErrorMessage(
+                                    message: ErrorString.invalidEmail,
                                   ),
                                 ),
-                                const SizedBox(width: 8.0),
-                                Flexible(
-                                  child: Button(
-                                    isDarkTheme: themeProvider.isDarkTheme,
-                                    isDanger: true,
-                                    icon: IconlyBold.closeSquare,
-                                    text: 'Cancel',
-                                    onPressed: () => cleanForm(),
+                                DividerWidget(),
+                                InputWidget(
+                                  isDarkTheme: themeProvider.isDarkTheme,
+                                  controller: name["controller"],
+                                  focusNode: name["focusNode"],
+                                  hintText: name["hintText"],
+                                  isRequired: name["isRequired"],
+                                  isEnabled: name["isEnabled"],
+                                  isTouched: name["isTouched"],
+                                  isVerified: name["isVerified"],
+                                  onChanged: (value) => checkNameValidation(),
+                                ),
+                                Visibility(
+                                  visible:
+                                      name["isTouched"] && !name["isVerified"],
+                                  child: ErrorMessage(
+                                    message: ErrorString.invalidName,
+                                  ),
+                                ),
+                                DividerWidget(),
+                                InputWidget(
+                                  isDarkTheme: themeProvider.isDarkTheme,
+                                  controller: password["controller"],
+                                  focusNode: password["focusNode"],
+                                  hintText: password["hintText"],
+                                  minLength: password["minLength"],
+                                  maxLength: password["maxLength"],
+                                  isPassword: password["isPassword"],
+                                  isOpenEye: password["isOpenEye"],
+                                  isRequired: password["isRequired"],
+                                  isEnabled: password["isEnabled"],
+                                  isTouched: password["isTouched"],
+                                  isVerified:
+                                      password["isVerified"] &&
+                                      password["controller"].text ==
+                                          confirmPassword["controller"].text,
+                                  toggleEye: togglePasswordEye,
+                                  onChanged:
+                                      (value) => checkPasswordValidation(),
+                                ),
+                                Visibility(
+                                  visible:
+                                      password["isTouched"] &&
+                                          !password["isVerified"] ||
+                                      (password["controller"].text !=
+                                          confirmPassword["controller"].text),
+                                  child: ErrorMessage(
+                                    message: ErrorString.invalidPassword,
+                                  ),
+                                ),
+                                DividerWidget(),
+                                InputWidget(
+                                  isDarkTheme: themeProvider.isDarkTheme,
+                                  controller: confirmPassword["controller"],
+                                  focusNode: confirmPassword["focusNode"],
+                                  hintText: confirmPassword["hintText"],
+                                  minLength: confirmPassword["minLength"],
+                                  maxLength: confirmPassword["maxLength"],
+                                  isPassword: confirmPassword["isPassword"],
+                                  isOpenEye: confirmPassword["isOpenEye"],
+                                  isRequired: confirmPassword["isRequired"],
+                                  isEnabled: confirmPassword["isEnabled"],
+                                  isTouched: confirmPassword["isTouched"],
+                                  isVerified:
+                                      confirmPassword["isVerified"] &&
+                                      password["controller"].text ==
+                                          confirmPassword["controller"].text,
+                                  toggleEye: toggleConfirmPasswordEye,
+                                  onChanged:
+                                      (value) =>
+                                          checkConfirmPasswordValidation(),
+                                ),
+                                Visibility(
+                                  visible:
+                                      confirmPassword["isTouched"] &&
+                                          !confirmPassword["isVerified"] ||
+                                      (password["controller"].text !=
+                                          confirmPassword["controller"].text),
+                                  child: ErrorMessage(
+                                    message: ErrorString.invalidConfirmPassword,
                                   ),
                                 ),
                               ],
                             ),
-                            DividerWidget(),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                ParagraphWidget(
+                          ),
+                          DividerWidget(height: Styles.dividerHeight),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                child: Button(
                                   isDarkTheme: themeProvider.isDarkTheme,
-                                  text: 'Already have an account? ',
+                                  text: 'Register',
+                                  icon: IconlyBold.login,
+                                  onPressed: () => submit(),
                                 ),
-                                LinkButton(
+                              ),
+                              const SizedBox(width: 8.0),
+                              Flexible(
+                                child: Button(
                                   isDarkTheme: themeProvider.isDarkTheme,
                                   isDanger: true,
-                                  text: 'Sign In',
-                                  onPressed: () {
-                                    // Wrapping MaterialApp inside SignUpScreen will create a new navigation context
-                                    // Named routes like Navigator.pushNamed(...) will not work inside this nested navigator unless defined again.
-                                    // Instead of using named routes, it can use MaterialPageRoute to navigate to SignInScreen.
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder:
-                                            (context) => SignInScreen(
-                                              themeData: widget.themeData,
-                                            ),
-                                      ),
-                                    );
-                                  },
+                                  icon: IconlyBold.closeSquare,
+                                  text: 'Cancel',
+                                  onPressed: () => cleanForm(),
                                 ),
-                              ],
-                            ),
-                          ],
-                        ),
+                              ),
+                            ],
+                          ),
+                          DividerWidget(),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ParagraphWidget(
+                                isDarkTheme: themeProvider.isDarkTheme,
+                                text: 'Already have an account? ',
+                              ),
+                              LinkButton(
+                                isDarkTheme: themeProvider.isDarkTheme,
+                                isDanger: true,
+                                text: 'Sign In',
+                                onPressed: () {
+                                  // Wrapping MaterialApp inside SignUpScreen will create a new navigation context
+                                  // Named routes like Navigator.pushNamed(...) will not work inside this nested navigator unless defined again.
+                                  // Instead of using named routes, it can use MaterialPageRoute to navigate to SignInScreen.
+                                  Navigator.pushReplacementNamed(
+                                    context,
+                                    SignInScreen.id,
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }

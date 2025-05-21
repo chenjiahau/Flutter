@@ -13,6 +13,7 @@ import 'package:accounting/screens/signin_screen.dart';
 import 'package:accounting/screens/signup_screen.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load();
 
   runApp(
@@ -53,7 +54,7 @@ class _MyApp extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       theme: themeData,
       builder: EasyLoading.init(),
-      initialRoute: HomeScreen.id,
+      initialRoute: SignInScreen.id,
       routes: {
         HomeScreen.id: (context) => const HomeScreen(),
         SignInScreen.id: (context) => SignInScreen(themeData: themeData),

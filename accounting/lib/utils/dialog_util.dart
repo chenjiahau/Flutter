@@ -36,7 +36,7 @@ showCommonErrorDialog({
                 callbackFn();
               }
             },
-            child: Text(btnText),
+            child: Text(btnText, style: TextStyle(color: Colors.red)),
           ),
         ],
       );
@@ -80,7 +80,7 @@ showSuccessDialog({
                 callbackFn();
               }
             },
-            child: Text(btnText),
+            child: Text(btnText, style: TextStyle(color: Colors.green)),
           ),
         ],
       );
@@ -121,7 +121,7 @@ showErrorDialog({
                 callbackFn();
               }
             },
-            child: Text(btnText),
+            child: Text(btnText, style: TextStyle(color: Colors.red)),
           ),
         ],
       );
